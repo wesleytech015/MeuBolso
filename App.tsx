@@ -1,20 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ProvedorContextoFinanceiro } from './src/contextos/ContextoFinanceiro';
+import { NavegacaoPrincipal } from './src/navegacao/NavegacaoPrincipal';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <ProvedorContextoFinanceiro>
+      <NavegacaoPrincipal />
       <StatusBar style="auto" />
-    </View>
+    </ProvedorContextoFinanceiro>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
