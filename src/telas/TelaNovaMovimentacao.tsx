@@ -20,56 +20,71 @@ export function TelaNovaMovimentacao() {
      const { adicionarMovimentacao } = useContextoFinanceiro();
 
   const [descricao, setDescricao] = useState('');
-
+  const [salvando, setSalvando] = useState(false);
   
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('');
   const [tipo, setTipo] = useState<TipoMovimentacao>('despesa');
 
- function salvarMovimentacao() {
-    if (!descricao.trim()) {
-      Alert.alert('Atenção', 'Informe a descrição.');
-      return;
-    }
+ async function salvarMovimentacao() {
+  if (salvando) {
+    return;
+  }
 
-    const valorDigitado = valor.trim();
+  if (!descricao.trim()) {
+    Alert.alert('Atenção', 'Informe a descrição.');
+    return;
+  }
 
-    // Aceita exemplos como 25, 25,90 ou 25.90.
-    if (!/^\d+([.,]\d{1,2})?$/.test(valorDigitado)) {
-      Alert.alert(
-        'Atenção',
-        'Informe um valor válido, como 25,90, sem separador de milhar.',
-      );
-      return;
-    }
+  const valorDigitado = valor.trim();
 
-    const valorNumerico = Number(valorDigitado.replace(',', '.'));
+  if (!/^\d+([.,]\d{1,2})?$/.test(valorDigitado)) {
+    Alert.alert(
+      'Atenção',
+      'Informe um valor válido, como 25,90, sem separador de milhar.',
+    );
+    return;
+  }
 
-    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
-      Alert.alert('Atenção', 'O valor deve ser maior que zero.');
-      return;
-    }
+  const valorNumerico = Number(valorDigitado.replace(',', '.'));
 
-    if (!categoria.trim()) {
-      Alert.alert('Atenção', 'Informe a categoria.');
-      return;
-    }
+  if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+    Alert.alert('Atenção', 'O valor deve ser maior que zero.');
+    return;
+  }
 
-   adicionarMovimentacao({
-  id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-  descricao: descricao.trim(),
-  valor: valorNumerico,
-  tipo,
-  categoria: categoria.trim(),
-  data: new Date().toISOString(),
-});
+  if (!categoria.trim()) {
+    Alert.alert('Atenção', 'Informe a categoria.');
+    return;
+  }
 
-setDescricao('');
-setValor('');
-setCategoria('');
-setTipo('despesa');
+  setSalvando(true);
 
-Alert.alert('Sucesso', 'Movimentação adicionada.');
+  try {
+    await adicionarMovimentacao({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      descricao: descricao.trim(),
+      valor: valorNumerico,
+      tipo,
+      categoria: categoria.trim(),
+      data: new Date().toISOString(),
+    });
+
+    setDescricao('');
+    setValor('');
+    setCategoria('');
+    setTipo('despesa');
+
+    Alert.alert('Sucesso', 'Movimentação salva.');
+  } catch {
+    Alert.alert(
+      'Erro ao salvar',
+      'Não foi possível salvar a movimentação. Tente novamente.',
+    );
+  } finally {
+    setSalvando(false);
+  }
+
 
   }
 
@@ -125,10 +140,13 @@ Alert.alert('Sucesso', 'Movimentação adicionada.');
 
       <Pressable
         accessibilityRole="button"
-        style={styles.botao}
-        onPress={salvarMovimentacao}
-      >
-        <Text style={styles.textoBotao}>Salvar movimentação</Text>
+  disabled={salvando}
+  style={[styles.botao, salvando && { opacity: 0.6 }]}
+  onPress={salvarMovimentacao}
+>
+  <Text style={styles.textoBotao}>
+    {salvando ? 'Salvando...' : 'Salvar movimentação'}
+  </Text>
       </Pressable>
     </ScrollView>
   );

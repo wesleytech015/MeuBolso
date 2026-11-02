@@ -5,6 +5,7 @@ import { useContextoFinanceiro } from '../contextos/ContextoFinanceiro';
 
 export function TelaMovimentacoes() {
   const { movimentacoes } = useContextoFinanceiro();
+  
 
   return (
     <FlatList
