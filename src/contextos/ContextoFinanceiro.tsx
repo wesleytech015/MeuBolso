@@ -1,27 +1,32 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import { ActivityIndicator, Button, Text, View } from 'react-native';
 
-export type TipoMovimentacao = 'receita' | 'despesa';
-
-export interface MovimentacaoFinanceira {
-  id: string;
-  descricao: string;
-  valor: number;
-  tipo: TipoMovimentacao;
-  categoria: string;
-  data: string;
-}
+import {
+  carregarMovimentacoes,
+  salvarMovimentacoes,
+} from '../servicos/ServicoArmazenamento';
+import type { MovimentacaoFinanceira } from '../tipos/Movimentacao';
 
 interface DadosContextoFinanceiro {
   movimentacoes: MovimentacaoFinanceira[];
   totalReceitas: number;
   totalDespesas: number;
   saldo: number;
-  adicionarMovimentacao: (movimentacao: MovimentacaoFinanceira) => void;
+  adicionarMovimentacao: (
+    movimentacao: MovimentacaoFinanceira,
+  ) => Promise<void>;
 }
 
-const ContextoFinanceiro = createContext<DadosContextoFinanceiro | undefined>(
-  undefined,
-);
+const ContextoFinanceiro = createContext<
+  DadosContextoFinanceiro | undefined
+>(undefined);
 
 interface ProvedorContextoFinanceiroProps {
   children: ReactNode;
@@ -30,9 +35,71 @@ interface ProvedorContextoFinanceiroProps {
 export function ProvedorContextoFinanceiro({
   children,
 }: ProvedorContextoFinanceiroProps) {
-  const [movimentacoes, setMovimentacoes] = useState<MovimentacaoFinanceira[]>(
-    [],
-  );
+  const [movimentacoes, setMovimentacoes] = useState<
+    MovimentacaoFinanceira[]
+  >([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
+
+  const listaAtual = useRef<MovimentacaoFinanceira[]>([]);
+  const gravando = useRef(false);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarDados() {
+      setCarregando(true);
+      setErroCarregamento(false);
+
+      try {
+        const dados = await carregarMovimentacoes();
+
+        if (ativo) {
+          listaAtual.current = dados;
+          setMovimentacoes(dados);
+        }
+      } catch {
+        if (ativo) {
+          setErroCarregamento(true);
+        }
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    void carregarDados();
+
+    return () => {
+      ativo = false;
+    };
+  }, [tentativa]);
+
+  async function adicionarMovimentacao(
+    movimentacao: MovimentacaoFinanceira,
+  ): Promise<void> {
+    if (gravando.current) {
+      throw new Error('Aguarde a gravação atual.');
+    }
+
+    gravando.current = true;
+
+    try {
+      const novasMovimentacoes = [
+        ...listaAtual.current,
+        movimentacao,
+      ];
+
+      await salvarMovimentacoes(novasMovimentacoes);
+
+      listaAtual.current = novasMovimentacoes;
+      setMovimentacoes(novasMovimentacoes);
+    } finally {
+      gravando.current = false;
+    }
+  }
 
   const totais = movimentacoes.reduce(
     (resultado, movimentacao) => {
@@ -47,18 +114,45 @@ export function ProvedorContextoFinanceiro({
     { totalReceitas: 0, totalDespesas: 0 },
   );
 
-  const dadosContexto: DadosContextoFinanceiro = {
-    movimentacoes,
-    totalReceitas: totais.totalReceitas,
-    totalDespesas: totais.totalDespesas,
-    saldo: totais.totalReceitas - totais.totalDespesas,
-    adicionarMovimentacao: (movimentacao) => {
-      setMovimentacoes((atuais) => [...atuais, movimentacao]);
-    },
-  };
+  if (carregando || erroCarregamento) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 24,
+          gap: 16,
+        }}
+      >
+        {carregando ? (
+          <>
+            <ActivityIndicator size="large" color="#2563EB" />
+            <Text>Carregando movimentações...</Text>
+          </>
+        ) : (
+          <>
+            <Text>Não foi possível carregar as movimentações.</Text>
+            <Button
+              title="Tentar novamente"
+              onPress={() => setTentativa((atual) => atual + 1)}
+            />
+          </>
+        )}
+      </View>
+    );
+  }
 
   return (
-    <ContextoFinanceiro.Provider value={dadosContexto}>
+    <ContextoFinanceiro.Provider
+      value={{
+        movimentacoes,
+        totalReceitas: totais.totalReceitas,
+        totalDespesas: totais.totalDespesas,
+        saldo: totais.totalReceitas - totais.totalDespesas,
+        adicionarMovimentacao,
+      }}
+    >
       {children}
     </ContextoFinanceiro.Provider>
   );
