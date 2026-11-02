@@ -1,15 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-export type TipoMovimentacao = 'receita' | 'despesa';
+import type { MovimentacaoFinanceira } from '../tipos/Movimentacao';
 
-export interface MovimentacaoFinanceira {
-  id: string;
-  descricao: string;
-  valor: number;
-  tipo: TipoMovimentacao;
-  categoria: string;
-  data: string;
-}
 
 interface DadosContextoFinanceiro {
   movimentacoes: MovimentacaoFinanceira[];
