@@ -128,7 +128,7 @@ Alert.alert('Sucesso', 'Movimentação adicionada.');
         style={styles.botao}
         onPress={salvarMovimentacao}
       >
-        <Text style={styles.textoBotao}>Validar movimentação</Text>
+        <Text style={styles.textoBotao}>Salvar movimentação</Text>
       </Pressable>
     </ScrollView>
   );

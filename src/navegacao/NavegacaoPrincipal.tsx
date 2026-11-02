@@ -12,9 +12,6 @@ export type ParametrosNavegacaoPrincipal = {
 
 const Pilha = createNativeStackNavigator<ParametrosNavegacaoPrincipal>();
 
-function TelaTemporaria(): null {
-  return null;
-}
 
 export function NavegacaoPrincipal() {
   return (
