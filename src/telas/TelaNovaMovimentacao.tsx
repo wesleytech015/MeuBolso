@@ -55,10 +55,22 @@ export function TelaNovaMovimentacao() {
       return;
     }
 
-    Alert.alert(
-      'Formulário válido',
-      'Os campos estão corretos. Na próxima etapa, vamos salvar a movimentação.',
-    );
+   adicionarMovimentacao({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+  descricao: descricao.trim(),
+  valor: valorNumerico,
+  tipo,
+  categoria: categoria.trim(),
+  data: new Date().toISOString(),
+});
+
+setDescricao('');
+setValor('');
+setCategoria('');
+setTipo('despesa');
+
+Alert.alert('Sucesso', 'Movimentação adicionada.');
+
   }
 
   return (
@@ -114,7 +126,7 @@ export function TelaNovaMovimentacao() {
       <Pressable
         accessibilityRole="button"
         style={styles.botao}
-        onPress={validarFormulario}
+        onPress={salvarMovimentacao}
       >
         <Text style={styles.textoBotao}>Validar movimentação</Text>
       </Pressable>
