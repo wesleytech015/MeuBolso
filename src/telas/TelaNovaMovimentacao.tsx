@@ -13,6 +13,20 @@ import { useContextoFinanceiro } from '../contextos/ContextoFinanceiro';
 
 import type { TipoMovimentacao } from '../tipos/Movimentacao';
 
+const CATEGORIAS_POR_TIPO: Record<TipoMovimentacao, string[]> = {
+  receita: ['Salário', 'Freelance', 'Venda', 'Investimento', 'Outros'],
+  despesa: [
+    'Alimentação',
+    'Transporte',
+    'Moradia',
+    'Lazer',
+    'Saúde',
+    'Educação',
+    'Contas',
+    'Outros',
+  ],
+};
+
 
 
 export function TelaNovaMovimentacao() {
@@ -25,6 +39,14 @@ export function TelaNovaMovimentacao() {
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('');
   const [tipo, setTipo] = useState<TipoMovimentacao>('despesa');
+  const categoriasDisponiveis = CATEGORIAS_POR_TIPO[tipo];
+
+  function alterarTipo(novoTipo: TipoMovimentacao) {
+    if (novoTipo !== tipo) {
+      setTipo(novoTipo);
+      setCategoria('');
+    }
+  }
 
  async function salvarMovimentacao() {
   if (salvando) {
@@ -53,8 +75,8 @@ export function TelaNovaMovimentacao() {
     return;
   }
 
-  if (!categoria.trim()) {
-    Alert.alert('Atenção', 'Informe a categoria.');
+  if (!categoriasDisponiveis.includes(categoria)) {
+    Alert.alert('Atenção', 'Escolha uma categoria.');
     return;
   }
 
@@ -110,14 +132,6 @@ export function TelaNovaMovimentacao() {
         onChangeText={setValor}
       />
 
-      <Text style={styles.rotulo}>Categoria</Text>
-      <TextInput
-        style={styles.campo}
-        placeholder="Ex.: alimentação"
-        value={categoria}
-        onChangeText={setCategoria}
-      />
-
       <Text style={styles.rotulo}>Tipo</Text>
       <View style={styles.tipos}>
         {(['receita', 'despesa'] as const).map((opcao) => (
@@ -125,7 +139,7 @@ export function TelaNovaMovimentacao() {
             key={opcao}
             accessibilityRole="button"
             accessibilityState={{ selected: tipo === opcao }}
-            onPress={() => setTipo(opcao)}
+            onPress={() => alterarTipo(opcao)}
             style={[
               styles.opcao,
               tipo === opcao && styles.opcaoSelecionada,
@@ -134,6 +148,25 @@ export function TelaNovaMovimentacao() {
             <Text style={styles.textoOpcao}>
               {opcao === 'receita' ? 'Receita' : 'Despesa'}
             </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={styles.rotulo}>Categoria</Text>
+      <Text style={styles.orientacaoCategoria}>Escolha uma categoria</Text>
+      <View style={styles.categorias}>
+        {categoriasDisponiveis.map((opcao) => (
+          <Pressable
+            key={opcao}
+            accessibilityRole="button"
+            accessibilityState={{ selected: categoria === opcao }}
+            onPress={() => setCategoria(opcao)}
+            style={[
+              styles.categoria,
+              categoria === opcao && styles.opcaoSelecionada,
+            ]}
+          >
+            <Text style={styles.textoOpcao}>{opcao}</Text>
           </Pressable>
         ))}
       </View>
@@ -178,6 +211,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginBottom: 24,
+  },
+  orientacaoCategoria: {
+    marginBottom: 12,
+    color: '#64748B',
+    fontSize: 14,
+  },
+  categorias: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 24,
+  },
+  categoria: {
+    minHeight: 48,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
   },
   opcao: {
     flex: 1,
