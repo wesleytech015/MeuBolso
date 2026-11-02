@@ -39,12 +39,14 @@ export function TelaNovaMovimentacao() {
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('');
   const [tipo, setTipo] = useState<TipoMovimentacao>('despesa');
+  const [listaAberta, setListaAberta] = useState(false);
   const categoriasDisponiveis = CATEGORIAS_POR_TIPO[tipo];
 
   function alterarTipo(novoTipo: TipoMovimentacao) {
     if (novoTipo !== tipo) {
       setTipo(novoTipo);
       setCategoria('');
+      setListaAberta(false);
     }
   }
 
@@ -95,6 +97,7 @@ export function TelaNovaMovimentacao() {
     setDescricao('');
     setValor('');
     setCategoria('');
+    setListaAberta(false);
     setTipo('despesa');
 
     Alert.alert('Sucesso', 'Movimentação salva.');
@@ -118,7 +121,7 @@ export function TelaNovaMovimentacao() {
       <Text style={styles.rotulo}>Descrição</Text>
       <TextInput
         style={styles.campo}
-        placeholder="Ex.: compra no mercado"
+        placeholder={tipo === 'receita' ? 'Ex.: pagamento de freelance' : 'Ex.: compra no mercado'}
         value={descricao}
         onChangeText={setDescricao}
       />
@@ -153,18 +156,27 @@ export function TelaNovaMovimentacao() {
       </View>
 
       <Text style={styles.rotulo}>Categoria</Text>
-      <Text style={styles.orientacaoCategoria}>Escolha uma categoria</Text>
-      <View style={styles.categorias}>
-        {categoriasDisponiveis.map((opcao) => (
+      <View style={styles.seletor}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Categoria: ${categoria || 'Escolha uma categoria'}`}
+          accessibilityState={{ expanded: listaAberta }}
+          onPress={() => setListaAberta(aberta => !aberta)}
+          style={styles.linhaSeletor}
+        >
+          <Text style={styles.textoOpcao}>{categoria || 'Escolha uma categoria'}</Text>
+          <Text>{listaAberta ? '▴' : '▾'}</Text>
+        </Pressable>
+        {listaAberta && categoriasDisponiveis.map(opcao => (
           <Pressable
             key={opcao}
             accessibilityRole="button"
             accessibilityState={{ selected: categoria === opcao }}
-            onPress={() => setCategoria(opcao)}
-            style={[
-              styles.categoria,
-              categoria === opcao && styles.opcaoSelecionada,
-            ]}
+            style={[styles.linhaCategoria, categoria === opcao && styles.opcaoSelecionada]}
+            onPress={() => {
+              setCategoria(opcao);
+              setListaAberta(false);
+            }}
           >
             <Text style={styles.textoOpcao}>{opcao}</Text>
           </Pressable>
@@ -212,26 +224,27 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
-  orientacaoCategoria: {
-    marginBottom: 12,
-    color: '#64748B',
-    fontSize: 14,
-  },
-  categorias: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+  seletor: {
     marginBottom: 24,
-  },
-  categoria: {
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+  },
+  linhaSeletor: {
+    minHeight: 48,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  linhaCategoria: {
+    minHeight: 48,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: '#CBD5E1',
   },
   opcao: {
     flex: 1,
