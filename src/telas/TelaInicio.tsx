@@ -17,8 +17,8 @@ export function TelaInicio({ navigation }: PropriedadesTelaInicio) {
       <Text style={styles.titulo}>MeuBolso</Text>
 
       <CartaoResumo titulo="Saldo Atual" valor={saldo} />
-      <CartaoResumo titulo="Receitas" valor={totalReceitas} />
-      <CartaoResumo titulo="Despesas" valor={totalDespesas} />
+      <CartaoResumo titulo="Receitas" valor={totalReceitas} corValor="#15803D" />
+      <CartaoResumo titulo="Despesas" valor={totalDespesas} corValor="#B91C1C" />
 
       <Pressable
         accessibilityRole="button"
