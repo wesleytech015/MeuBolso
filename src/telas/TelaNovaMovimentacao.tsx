@@ -128,7 +128,8 @@ export function TelaNovaMovimentacao() {
 
       <Text style={styles.rotulo}>Valor (R$)</Text>
       <TextInput
-        style={styles.campo}
+        style={[styles.campo, { color: tipo === 'receita' ? '#15803D' : '#B91C1C' }]}
+        placeholderTextColor="#64748B"
         placeholder="Ex.: 25,90"
         keyboardType="decimal-pad"
         value={valor}
@@ -145,10 +146,14 @@ export function TelaNovaMovimentacao() {
             onPress={() => alterarTipo(opcao)}
             style={[
               styles.opcao,
-              tipo === opcao && styles.opcaoSelecionada,
+              tipo === opcao && (opcao === 'receita' ? styles.receitaSelecionada : styles.despesaSelecionada),
             ]}
           >
-            <Text style={styles.textoOpcao}>
+            <Text style={[
+              styles.textoOpcao,
+              opcao === 'receita' ? styles.textoReceita : styles.textoDespesa,
+              tipo === opcao && styles.textoTipoSelecionado,
+            ]}>
               {opcao === 'receita' ? 'Receita' : 'Despesa'}
             </Text>
           </Pressable>
@@ -255,6 +260,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
+  receitaSelecionada: { backgroundColor: '#15803D', borderColor: '#15803D' },
+  despesaSelecionada: { backgroundColor: '#B91C1C', borderColor: '#B91C1C' },
+  textoReceita: { color: '#15803D' },
+  textoDespesa: { color: '#B91C1C' },
+  textoTipoSelecionado: { color: '#FFFFFF' },
   opcaoSelecionada: {
     borderColor: '#2563EB',
     backgroundColor: '#DBEAFE',
