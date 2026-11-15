@@ -1,6 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { TelaNovaMovimentacao } from '../telas/TelaNovaMovimentacao';
 import { TelaInicio } from '../telas/TelaInicio';
+import { TelaMovimentacoes } from '../telas/TelaMovimentacoes';
 
 export type ParametrosNavegacaoPrincipal = {
   Inicio: undefined;
@@ -10,9 +12,6 @@ export type ParametrosNavegacaoPrincipal = {
 
 const Pilha = createNativeStackNavigator<ParametrosNavegacaoPrincipal>();
 
-function TelaTemporaria(): null {
-  return null;
-}
 
 export function NavegacaoPrincipal() {
   return (
@@ -24,15 +23,15 @@ export function NavegacaoPrincipal() {
           options={{ headerShown: false }}
         />
         <Pilha.Screen
-          name="NovaMovimentacao"
-          component={TelaTemporaria}
-          options={{ title: 'Nova Movimentação' }}
-        />
-        <Pilha.Screen
-          name="Movimentacoes"
-          component={TelaTemporaria}
-          options={{ title: 'Movimentações' }}
-        />
+  name="NovaMovimentacao"
+  component={TelaNovaMovimentacao}
+  options={{ title: 'Nova Movimentação' }}
+/>
+       <Pilha.Screen
+  name="Movimentacoes"
+  component={TelaMovimentacoes}
+  options={{ title: 'Movimentações' }}
+/>
       </Pilha.Navigator>
     </NavigationContainer>
   );
